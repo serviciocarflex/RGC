@@ -38,35 +38,39 @@ body::before {
 
 .card {
     width: 100%;
-    max-width: 520px;
+    max-width: 900px;
     background: rgba(255,255,255,.98);
     border-radius: 22px;
-    padding: 40px;
+    padding: 32px;
     box-shadow: 0 25px 50px rgba(0,0,0,.25);
 }
 
+.header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
 .logo {
-    width: 150px;
-    display: block;
-    margin: 0 auto 20px auto;
+    width: 145px;
+    margin-bottom: 12px;
 }
 
 h2 {
-    text-align: center;
     color: var(--text);
-    margin-bottom: 8px;
-    font-size: 28px;
+    font-size: 26px;
+    margin-bottom: 6px;
 }
 
 .subtitle {
-    text-align: center;
     color: var(--muted);
     font-size: 14px;
-    line-height: 1.5;
-    margin-bottom: 30px;
 }
 
-.input-group { margin-bottom: 20px; }
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px 24px;
+}
 
 .input-group span {
     display: block;
@@ -80,7 +84,7 @@ h2 {
 
 input, select {
     width: 100%;
-    padding: 14px;
+    padding: 13px;
     border-radius: 12px;
     border: 2px solid var(--border);
     font-size: 15px;
@@ -93,13 +97,61 @@ input:focus, select:focus {
     box-shadow: 0 0 0 4px rgba(255,114,37,.1);
 }
 
+.file-section {
+    grid-column: 1 / 3;
+    padding: 18px;
+    border: 2px dashed var(--border);
+    border-radius: 16px;
+    background: #fafafa;
+}
+
+.file-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+}
+
+.file-box {
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+    background: white;
+    text-align: center;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.file-box:hover {
+    border-color: var(--primary);
+    background: #fff7ed;
+}
+
+.file-box input {
+    display: none;
+}
+
+.file-box label {
+    cursor: pointer;
+    display: block;
+    font-size: 13px;
+    color: var(--text);
+}
+
+.file-name {
+    margin-top: 6px;
+    font-size: 11px;
+    color: var(--muted);
+    word-break: break-word;
+}
+
 .file-help {
     font-size: 12px;
     color: var(--muted);
-    margin-top: 6px;
+    margin-top: 10px;
 }
 
 button {
+    grid-column: 1 / 3;
     width: 100%;
     padding: 16px;
     border: none;
@@ -115,7 +167,8 @@ button:hover { background: var(--primary-dark); }
 button:disabled { opacity: .6; cursor: not-allowed; }
 
 .msg {
-    margin-top: 18px;
+    grid-column: 1 / 3;
+    margin-top: 4px;
     font-size: 14px;
     text-align: center;
     min-height: 20px;
@@ -137,24 +190,20 @@ button:disabled { opacity: .6; cursor: not-allowed; }
     border: 1px solid #dcfce7;
 }
 
-.info-box {
-    margin-top: 30px;
-    padding: 18px;
-    border-radius: 14px;
-    background: #fff7ed;
-    border: 1px solid #ffedd5;
-}
+@media (max-width: 760px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
 
-.info-box h4 {
-    color: #9a3412;
-    margin-bottom: 10px;
-    font-size: 14px;
-}
+    .file-section,
+    button,
+    .msg {
+        grid-column: 1;
+    }
 
-.info-box p {
-    color: #7c2d12;
-    font-size: 13px;
-    line-height: 1.5;
+    .file-grid {
+        grid-template-columns: 1fr;
+    }
 }
 </style>
 </head>
@@ -163,16 +212,13 @@ button:disabled { opacity: .6; cursor: not-allowed; }
 
 <div class="card">
 
-    <img src="Logo carflex.jpg" class="logo" alt="Carflex">
+    <div class="header">
+        <img src="Logo carflex.jpg" class="logo" alt="Carflex">
+        <h2>Portal RGC</h2>
+        <p class="subtitle">Solicitud automática de informe de daños RGC</p>
+    </div>
 
-    <h2>Portal RGC</h2>
-
-    <p class="subtitle">
-        Solicitud automática de informe de daños RGC.
-        Completa los datos del contrato, adjunta las imágenes y envía la solicitud.
-    </p>
-
-    <form id="form">
+    <form id="form" class="form-grid">
 
         <div class="input-group">
             <span>N° OT</span>
@@ -205,11 +251,52 @@ button:disabled { opacity: .6; cursor: not-allowed; }
         </div>
 
         <div class="input-group">
-            <span>Fotografías del daño</span>
-            <input id="imagenes" type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png" multiple required>
-            <p class="file-help">
-                Puede adjuntar una o más imágenes en formato JPG o PNG.
-            </p>
+            <span>Correo solicitante</span>
+            <input id="correoVisible" type="text" placeholder="Se completa automáticamente" disabled>
+        </div>
+
+        <div class="file-section">
+            <div class="input-group">
+                <span>Fotografías del daño</span>
+
+                <div class="file-grid">
+
+                    <div class="file-box">
+                        <label for="imagen1">Imagen 1</label>
+                        <input id="imagen1" type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png">
+                        <div class="file-name" id="name1">Sin archivo</div>
+                    </div>
+
+                    <div class="file-box">
+                        <label for="imagen2">Imagen 2</label>
+                        <input id="imagen2" type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png">
+                        <div class="file-name" id="name2">Sin archivo</div>
+                    </div>
+
+                    <div class="file-box">
+                        <label for="imagen3">Imagen 3</label>
+                        <input id="imagen3" type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png">
+                        <div class="file-name" id="name3">Sin archivo</div>
+                    </div>
+
+                    <div class="file-box">
+                        <label for="imagen4">Imagen 4</label>
+                        <input id="imagen4" type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png">
+                        <div class="file-name" id="name4">Sin archivo</div>
+                    </div>
+
+                    <div class="file-box">
+                        <label for="imagen5">Imagen 5</label>
+                        <input id="imagen5" type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png">
+                        <div class="file-name" id="name5">Sin archivo</div>
+                    </div>
+
+                </div>
+
+                <p class="file-help">
+                    Puede adjuntar hasta 5 imágenes en formato JPG o PNG. No son obligatorias.
+                </p>
+            </div>
         </div>
 
         <button type="submit" id="btn-submit">
@@ -219,14 +306,6 @@ button:disabled { opacity: .6; cursor: not-allowed; }
         <div id="msg" class="msg"></div>
 
     </form>
-
-    <div class="info-box">
-        <h4>¿Cómo funciona?</h4>
-        <p>
-            El sistema recibirá los datos de la OT, guardará las imágenes adjuntas
-            y generará el informe RGC para su envío automático.
-        </p>
-    </div>
 
 </div>
 
@@ -238,6 +317,18 @@ const correosSolicitantes = {
     "Johan": "johan@carflex.cl",
     "Daniel": "daniel@carflex.cl"
 };
+
+document.getElementById("solicitante").addEventListener("change", e => {
+    const solicitante = e.target.value;
+    document.getElementById("correoVisible").value = correosSolicitantes[solicitante] || "";
+});
+
+for (let i = 1; i <= 5; i++) {
+    document.getElementById("imagen" + i).addEventListener("change", e => {
+        const archivo = e.target.files[0];
+        document.getElementById("name" + i).textContent = archivo ? archivo.name : "Sin archivo";
+    });
+}
 
 document.getElementById("form").addEventListener("submit", async e => {
     e.preventDefault();
@@ -253,24 +344,22 @@ document.getElementById("form").addEventListener("submit", async e => {
     const numeroContrato = document.getElementById("numeroContrato").value.trim();
     const cliente = document.getElementById("cliente").value.trim();
 
-    const imagenes = document.getElementById("imagenes").files;
+    const imagenes = [
+        document.getElementById("imagen1").files[0],
+        document.getElementById("imagen2").files[0],
+        document.getElementById("imagen3").files[0],
+        document.getElementById("imagen4").files[0],
+        document.getElementById("imagen5").files[0]
+    ].filter(Boolean);
 
     if (!ot || !solicitante || !tipoContrato || !numeroContrato || !cliente) {
         msg.className = "msg error";
-        msg.innerHTML = "Debe completar todos los campos.";
+        msg.innerHTML = "Debe completar todos los campos obligatorios.";
         return;
     }
 
-    if (imagenes.length === 0) {
-        msg.className = "msg error";
-        msg.innerHTML = "Debe adjuntar al menos una imagen.";
-        return;
-    }
-
-    for (let i = 0; i < imagenes.length; i++) {
-        const tipo = imagenes[i].type;
-
-        if (tipo !== "image/jpeg" && tipo !== "image/png") {
+    for (const img of imagenes) {
+        if (img.type !== "image/jpeg" && img.type !== "image/png") {
             msg.className = "msg error";
             msg.innerHTML = "Solo se permiten imágenes JPG o PNG.";
             return;
@@ -286,9 +375,9 @@ document.getElementById("form").addEventListener("submit", async e => {
     formData.append("numeroContrato", numeroContrato);
     formData.append("cliente", cliente);
 
-    for (let i = 0; i < imagenes.length; i++) {
-        formData.append("imagenes", imagenes[i]);
-    }
+    imagenes.forEach((img, index) => {
+        formData.append("imagen" + (index + 1), img);
+    });
 
     msg.className = "msg";
     msg.innerHTML = "Enviando solicitud...";
@@ -303,8 +392,14 @@ document.getElementById("form").addEventListener("submit", async e => {
         if (!response.ok) throw new Error();
 
         msg.className = "msg success";
-        msg.innerHTML = "Solicitud enviada correctamente. El informe será procesado.";
+        msg.innerHTML = "Solicitud enviada correctamente.";
         document.getElementById("form").reset();
+
+        for (let i = 1; i <= 5; i++) {
+            document.getElementById("name" + i).textContent = "Sin archivo";
+        }
+
+        document.getElementById("correoVisible").value = "";
 
     } catch (err) {
         msg.className = "msg error";
