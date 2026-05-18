@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal RGC | Carflex</title>
+
+    <style>
+        :root {
+            --primary: #ff7225;
+            --primary-dark: #e65a15;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --border: #e5e7eb;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f3f4f6;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* FONDO */
+        body::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: url('fondo formulario.jpg') center/cover no-repeat;
+            filter: brightness(.55) blur(4px);
+            z-index: -1;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 460px;
+            background: rgba(255,255,255,.98);
+            border-radius: 22px;
+            padding: 40px;
+            box-shadow: 0 25px 50px rgba(0,0,0,.25);
+            backdrop-filter: blur(10px);
+            animation: fade .4s ease-out;
+        }
+
+        .logo {
+            width: 150px;
+            display: block;
+            margin: 0 auto 20px auto;
+        }
+
+        h2 {
+            text-align: center;
+            color: var(--text);
+            margin-bottom: 8px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 22px;
+        }
+
+        .input-group span {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--muted);
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: 2px solid var(--border);
+            font-size: 15px;
+            outline: none;
+            transition: all .25s;
+            background: white;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(255,114,37,.1);
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            background: var(--primary);
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .25s;
+        }
+
+        button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        button:disabled {
+            opacity: .6;
+            cursor: not-allowed;
+        }
+
+        .msg {
+            margin-top: 18px;
+            font-size: 14px;
+            text-align: center;
+            min-height: 20px;
+        }
+
+        .error {
+            background: #fef2f2;
+            color: #b91c1c;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #fee2e2;
+        }
+
+        .success {
+            background: #f0fdf4;
+            color: #166534;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #dcfce7;
+        }
+
+        .info-box {
+            margin-top: 30px;
+            padding: 18px;
+            border-radius: 14px;
+            background: #fff7ed;
+            border: 1px solid #ffedd5;
+        }
+
+        .info-box h4 {
+            color: #9a3412;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .info-box p {
+            color: #7c2d12;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        @keyframes fade {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="card">
+
+    <img src="Logo carflex.jpg" class="logo" alt="Carflex">
+
+    <h2>Portal RGC</h2>
+
+    <p class="subtitle">
+        Solicitud automática de informes de daños RGC.
+        Ingresa el número de OT y selecciona el solicitante.
+    </p>
+
+    <form id="form">
+
+        <div class="input-group">
+            <span>N° OT</span>
+
+            <input
+                id="ot"
+                type="text"
+                placeholder="Ej: 32249"
+                required
+                autocomplete="off"
+            >
+        </div>
+
+        <div class="input-group">
+            <span>Solicitante</span>
+
+            <select id="solicitante" required>
+                <option value="">Seleccione solicitante</option>
+                <option value="Marco">Marco</option>
+                <option value="Johan">Johan</option>
+                <option value="Daniel">Daniel</option>
+            </select>
+        </div>
+
+        <button type="submit" id="btn-submit">
+            Generar informe RGC
+        </button>
+
+        <div id="msg" class="msg"></div>
+
+    </form>
+
+    <div class="info-box">
+        <h4>¿Cómo funciona?</h4>
+
+        <p>
+            El sistema buscará automáticamente la OT solicitada,
+            generará el PDF con el detalle de daños y enviará el
+            informe al correo asociado al solicitante seleccionado.
+        </p>
+    </div>
+
+</div>
+
+<script>
+
+const WEBHOOK_URL = "https://shale-alarm-prodigy.ngrok-free.dev/webhook/rgc";
+
+const correosSolicitantes = {
+
+    "Marco": "marco@carflex.cl",
+    "Johan": "johan@carflex.cl",
+    "Daniel": "daniel@carflex.cl"
+
+};
+
+document.getElementById("form").addEventListener("submit", async e => {
+
+    e.preventDefault();
+
+    const msg = document.getElementById("msg");
+
+    const btn = document.getElementById("btn-submit");
+
+    const ot = document.getElementById("ot").value.trim();
+
+    const solicitante = document.getElementById("solicitante").value;
+
+    const correo = correosSolicitantes[solicitante];
+
+    if (!ot) {
+
+        msg.className = "msg error";
+
+        msg.innerHTML = "Debe ingresar el número de OT.";
+
+        return;
+    }
+
+    if (!solicitante) {
+
+        msg.className = "msg error";
+
+        msg.innerHTML = "Debe seleccionar un solicitante.";
+
+        return;
+    }
+
+    msg.className = "msg";
+
+    msg.innerHTML = "Generando informe...";
+
+    btn.disabled = true;
+
+    try {
+
+        const response = await fetch(WEBHOOK_URL, {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+
+                ot: ot,
+                solicitante: solicitante,
+                correo: correo
+
+            })
+
+        });
+
+        if (!response.ok) throw new Error();
+
+        msg.className = "msg success";
+
+        msg.innerHTML =
+            "Informe solicitado correctamente. Será enviado al correo de " +
+            solicitante +
+            ".";
+
+    } catch (err) {
+
+        msg.className = "msg error";
+
+        msg.innerHTML =
+            "Error de conexión. Intente nuevamente.";
+
+    }
+
+    btn.disabled = false;
+
+});
+
+</script>
+
+</body>
+</html>
