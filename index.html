@@ -111,14 +111,21 @@ input:focus, select:focus {
     gap: 12px;
 }
 
+/* ── CAMBIOS SOLO EN FILE-BOX ── */
 .file-box {
+    position: relative;
     border: 2px solid var(--border);
     border-radius: 12px;
-    padding: 12px;
     background: white;
     text-align: center;
     cursor: pointer;
-    transition: .2s;
+    transition: border-color .2s, background .2s;
+    overflow: hidden;
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 .file-box:hover {
@@ -126,8 +133,19 @@ input:focus, select:focus {
     background: #fff7ed;
 }
 
-.file-box input {
-    display: none;
+.file-box.has-file {
+    border-color: var(--primary);
+}
+
+/* input cubre toda la tarjeta */
+.file-box input[type="file"] {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 2;
 }
 
 .file-box label {
@@ -135,6 +153,55 @@ input:focus, select:focus {
     display: block;
     font-size: 13px;
     color: var(--text);
+    pointer-events: none;
+}
+
+/* vista previa */
+.file-box .preview-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+    display: none;
+    pointer-events: none;
+}
+
+.file-box .label-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    pointer-events: none;
+}
+
+.file-box .ico {
+    font-size: 22px;
+}
+
+/* botón quitar */
+.file-box .rm-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: rgba(0,0,0,.55);
+    color: #fff;
+    border: none;
+    font-size: 12px;
+    line-height: 22px;
+    text-align: center;
+    cursor: pointer;
+    display: none;
+    z-index: 10;
+    padding: 0;
+}
+
+.file-box.has-file .rm-btn {
+    display: block;
 }
 
 .file-name {
@@ -150,7 +217,7 @@ input:focus, select:focus {
     margin-top: 10px;
 }
 
-button {
+button[type="submit"] {
     grid-column: 1 / 3;
     width: 100%;
     padding: 16px;
@@ -163,8 +230,8 @@ button {
     cursor: pointer;
 }
 
-button:hover { background: var(--primary-dark); }
-button:disabled { opacity: .6; cursor: not-allowed; }
+button[type="submit"]:hover { background: var(--primary-dark); }
+button[type="submit"]:disabled { opacity: .6; cursor: not-allowed; }
 
 .msg {
     grid-column: 1 / 3;
@@ -191,20 +258,67 @@ button:disabled { opacity: .6; cursor: not-allowed; }
 }
 
 @media (max-width: 760px) {
-    .form-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .file-section,
-    button,
-    .msg {
-        grid-column: 1;
-    }
-
-    .file-grid {
-        grid-template-columns: 1fr;
-    }
+    .form-grid { grid-template-columns: 1fr; }
+    .file-section, button[type="submit"], .msg { grid-column: 1; }
+    .file-grid { grid-template-columns: 1fr; }
 }
+
+/* ── PANTALLA DE ÉXITO ── */
+#success-screen {
+    display: none;
+    text-align: center;
+    padding: 20px 10px 10px;
+}
+
+.success-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: #dcfce7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 36px;
+}
+
+#success-screen h3 {
+    color: var(--text);
+    font-size: 22px;
+    margin-bottom: 8px;
+}
+
+#success-screen p {
+    color: var(--muted);
+    font-size: 15px;
+    margin-bottom: 6px;
+}
+
+#success-screen .ot-label {
+    display: inline-block;
+    background: #fff7ed;
+    color: var(--primary);
+    border: 1.5px solid #ffcba4;
+    border-radius: 8px;
+    padding: 6px 18px;
+    font-size: 15px;
+    font-weight: 700;
+    margin: 10px 0 28px;
+}
+
+#btn-volver {
+    display: inline-block;
+    padding: 14px 36px;
+    border: none;
+    border-radius: 12px;
+    background: var(--primary);
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+#btn-volver:hover { background: var(--primary-dark); }
 </style>
 </head>
 
@@ -216,6 +330,17 @@ button:disabled { opacity: .6; cursor: not-allowed; }
         <img src="Logo carflex.jpg" class="logo" alt="Carflex">
         <h2>Portal RGC</h2>
         <p class="subtitle">Solicitud automática de informe de daños RGC</p>
+    </div>
+
+    <!-- PANTALLA ÉXITO -->
+    <div id="success-screen">
+        <div class="success-icon">✅</div>
+        <h3>¡Informe enviado!</h3>
+        <p>La solicitud RGC fue generada correctamente.</p>
+        <p style="color:var(--muted);font-size:13px;">OT N°</p>
+        <div class="ot-label" id="success-ot">—</div>
+        <br>
+        <button id="btn-volver">← Nueva solicitud</button>
     </div>
 
     <form id="form" class="form-grid">
@@ -261,33 +386,58 @@ button:disabled { opacity: .6; cursor: not-allowed; }
 
                 <div class="file-grid">
 
-                    <div class="file-box">
-                        <label for="imagen1">Imagen 1</label>
+                    <div class="file-box" id="box1">
+                        <img class="preview-img" id="prev1">
+                        <div class="label-wrap">
+                            <span class="ico">📷</span>
+                            <label for="imagen1">Imagen 1</label>
+                        </div>
                         <input id="imagen1" type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png">
+                        <button type="button" class="rm-btn" data-idx="1">✕</button>
                         <div class="file-name" id="name1">Sin archivo</div>
                     </div>
 
-                    <div class="file-box">
-                        <label for="imagen2">Imagen 2</label>
+                    <div class="file-box" id="box2">
+                        <img class="preview-img" id="prev2">
+                        <div class="label-wrap">
+                            <span class="ico">📷</span>
+                            <label for="imagen2">Imagen 2</label>
+                        </div>
                         <input id="imagen2" type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png">
+                        <button type="button" class="rm-btn" data-idx="2">✕</button>
                         <div class="file-name" id="name2">Sin archivo</div>
                     </div>
 
-                    <div class="file-box">
-                        <label for="imagen3">Imagen 3</label>
+                    <div class="file-box" id="box3">
+                        <img class="preview-img" id="prev3">
+                        <div class="label-wrap">
+                            <span class="ico">📷</span>
+                            <label for="imagen3">Imagen 3</label>
+                        </div>
                         <input id="imagen3" type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png">
+                        <button type="button" class="rm-btn" data-idx="3">✕</button>
                         <div class="file-name" id="name3">Sin archivo</div>
                     </div>
 
-                    <div class="file-box">
-                        <label for="imagen4">Imagen 4</label>
+                    <div class="file-box" id="box4">
+                        <img class="preview-img" id="prev4">
+                        <div class="label-wrap">
+                            <span class="ico">📷</span>
+                            <label for="imagen4">Imagen 4</label>
+                        </div>
                         <input id="imagen4" type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png">
+                        <button type="button" class="rm-btn" data-idx="4">✕</button>
                         <div class="file-name" id="name4">Sin archivo</div>
                     </div>
 
-                    <div class="file-box">
-                        <label for="imagen5">Imagen 5</label>
+                    <div class="file-box" id="box5">
+                        <img class="preview-img" id="prev5">
+                        <div class="label-wrap">
+                            <span class="ico">📷</span>
+                            <label for="imagen5">Imagen 5</label>
+                        </div>
                         <input id="imagen5" type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png">
+                        <button type="button" class="rm-btn" data-idx="5">✕</button>
                         <div class="file-name" id="name5">Sin archivo</div>
                     </div>
 
@@ -318,17 +468,57 @@ const correosSolicitantes = {
     "Daniel": "daniel@carflex.cl"
 };
 
+// Botón volver
+document.getElementById("btn-volver").addEventListener("click", () => {
+    document.getElementById("success-screen").style.display = "none";
+    document.getElementById("form").style.display = "grid";
+    document.getElementById("msg").className = "msg";
+    document.getElementById("msg").innerHTML = "";
+});
+
 document.getElementById("solicitante").addEventListener("change", e => {
     const solicitante = e.target.value;
     document.getElementById("correoVisible").value = correosSolicitantes[solicitante] || "";
 });
 
+// Vista previa + nombre al seleccionar imagen
 for (let i = 1; i <= 5; i++) {
-    document.getElementById("imagen" + i).addEventListener("change", e => {
-        const archivo = e.target.files[0];
-        document.getElementById("name" + i).textContent = archivo ? archivo.name : "Sin archivo";
+    document.getElementById("imagen" + i).addEventListener("change", function() {
+        const archivo = this.files[0];
+        const box = document.getElementById("box" + i);
+        const prev = document.getElementById("prev" + i);
+        const nameEl = document.getElementById("name" + i);
+        const labelWrap = box.querySelector(".label-wrap");
+
+        if (archivo) {
+            prev.src = URL.createObjectURL(archivo);
+            prev.style.display = "block";
+            labelWrap.style.display = "none";
+            nameEl.textContent = archivo.name;
+            box.classList.add("has-file");
+        }
     });
 }
+
+// Botones quitar
+document.querySelectorAll(".rm-btn").forEach(btn => {
+    btn.addEventListener("click", function(e) {
+        e.stopPropagation();
+        const idx = this.dataset.idx;
+        const box = document.getElementById("box" + idx);
+        const prev = document.getElementById("prev" + idx);
+        const nameEl = document.getElementById("name" + idx);
+        const labelWrap = box.querySelector(".label-wrap");
+        const input = document.getElementById("imagen" + idx);
+
+        input.value = "";
+        prev.src = "";
+        prev.style.display = "none";
+        labelWrap.style.display = "";
+        nameEl.textContent = "Sin archivo";
+        box.classList.remove("has-file");
+    });
+});
 
 document.getElementById("form").addEventListener("submit", async e => {
     e.preventDefault();
@@ -339,7 +529,6 @@ document.getElementById("form").addEventListener("submit", async e => {
     const ot = document.getElementById("ot").value.trim();
     const solicitante = document.getElementById("solicitante").value;
     const correo = correosSolicitantes[solicitante];
-
     const tipoContrato = document.getElementById("tipoContrato").value.trim();
     const numeroContrato = document.getElementById("numeroContrato").value.trim();
     const cliente = document.getElementById("cliente").value.trim();
@@ -367,7 +556,6 @@ document.getElementById("form").addEventListener("submit", async e => {
     }
 
     const formData = new FormData();
-
     formData.append("ot", ot);
     formData.append("solicitante", solicitante);
     formData.append("correo", correo);
@@ -391,15 +579,26 @@ document.getElementById("form").addEventListener("submit", async e => {
 
         if (!response.ok) throw new Error();
 
-        msg.className = "msg success";
-        msg.innerHTML = "Solicitud enviada correctamente.";
-        document.getElementById("form").reset();
+        // Guardar OT antes de resetear
+        const otEnviada = ot;
 
+        // Resetear formulario
+        document.getElementById("form").reset();
         for (let i = 1; i <= 5; i++) {
             document.getElementById("name" + i).textContent = "Sin archivo";
+            const box = document.getElementById("box" + i);
+            const prev = document.getElementById("prev" + i);
+            prev.src = "";
+            prev.style.display = "none";
+            box.querySelector(".label-wrap").style.display = "";
+            box.classList.remove("has-file");
         }
-
         document.getElementById("correoVisible").value = "";
+
+        // Mostrar pantalla de éxito
+        document.getElementById("success-ot").textContent = otEnviada;
+        document.getElementById("form").style.display = "none";
+        document.getElementById("success-screen").style.display = "block";
 
     } catch (err) {
         msg.className = "msg error";
