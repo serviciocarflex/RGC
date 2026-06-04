@@ -223,6 +223,27 @@ textarea {
     margin-top: 10px;
 }
 
+.add-img-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    padding: 9px 18px;
+    border: 2px dashed var(--primary);
+    border-radius: 10px;
+    background: #fff7ed;
+    color: var(--primary);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .2s, border-color .2s;
+}
+
+.add-img-btn:hover {
+    background: #ffedd5;
+    border-color: var(--primary-dark);
+}
+
 button[type="submit"] {
     grid-column: 1 / 3;
     width: 100%;
@@ -397,7 +418,7 @@ button[type="submit"]:disabled { opacity: .6; cursor: not-allowed; }
             <div class="input-group">
                 <span>Fotografías del daño</span>
 
-                <div class="file-grid">
+                <div class="file-grid" id="file-grid">
 
                     <div class="file-box" id="box1">
                         <img class="preview-img" id="prev1">
@@ -456,8 +477,11 @@ button[type="submit"]:disabled { opacity: .6; cursor: not-allowed; }
 
                 </div>
 
-                <p class="file-help">
-                    Puede adjuntar hasta 5 imágenes en formato JPG o PNG. No son obligatorias.
+                <button type="button" class="add-img-btn" id="btn-add-img">
+                    ➕ Agregar imagen
+                </button>
+                <p class="file-help" id="file-help-text">
+                    Puede adjuntar imágenes en formato JPG o PNG. No son obligatorias.
                 </p>
             </div>
         </div>
@@ -482,7 +506,79 @@ const correosSolicitantes = {
     "Daniel": "daniel.orellana@carflex.cl"
 };
 
-// Botón volver
+// Contador global de cajas (5 fijas al inicio)
+let totalBoxes = 5;
+
+// ── Función para registrar eventos en una file-box ──
+function bindBox(idx) {
+    const input     = document.getElementById("imagen" + idx);
+    const box       = document.getElementById("box" + idx);
+    const prev      = document.getElementById("prev" + idx);
+    const nameEl    = document.getElementById("name" + idx);
+    const labelWrap = box.querySelector(".label-wrap");
+    const rmBtn     = box.querySelector(".rm-btn");
+
+    input.addEventListener("change", function () {
+        const archivo = this.files[0];
+        if (archivo) {
+            prev.src = URL.createObjectURL(archivo);
+            prev.style.display = "block";
+            labelWrap.style.display = "none";
+            nameEl.textContent = archivo.name;
+            box.classList.add("has-file");
+        }
+    });
+
+    rmBtn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        if (idx > 5) {
+            box.remove();
+            updateHelpText();
+        } else {
+            input.value = "";
+            prev.src = "";
+            prev.style.display = "none";
+            labelWrap.style.display = "";
+            nameEl.textContent = "Sin archivo";
+            box.classList.remove("has-file");
+        }
+    });
+}
+
+// ── Registrar las 5 cajas originales ──
+for (let i = 1; i <= 5; i++) bindBox(i);
+
+// ── Botón Agregar imagen ──
+document.getElementById("btn-add-img").addEventListener("click", () => {
+    totalBoxes++;
+    const idx = totalBoxes;
+
+    const box = document.createElement("div");
+    box.className = "file-box";
+    box.id = "box" + idx;
+    box.innerHTML = `
+        <img class="preview-img" id="prev${idx}">
+        <div class="label-wrap">
+            <span class="ico">📷</span>
+            <label for="imagen${idx}">Imagen ${idx}</label>
+        </div>
+        <input id="imagen${idx}" type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png">
+        <button type="button" class="rm-btn" data-idx="${idx}">✕</button>
+        <div class="file-name" id="name${idx}">Sin archivo</div>
+    `;
+
+    document.getElementById("file-grid").appendChild(box);
+    bindBox(idx);
+    updateHelpText();
+});
+
+function updateHelpText() {
+    const total = document.querySelectorAll("#file-grid .file-box").length;
+    document.getElementById("file-help-text").textContent =
+        `Puede adjuntar imágenes en formato JPG o PNG (${total} campo${total !== 1 ? "s" : ""} disponible${total !== 1 ? "s" : ""}). No son obligatorias.`;
+}
+
+// ── Botón volver ──
 document.getElementById("btn-volver").addEventListener("click", () => {
     document.getElementById("success-screen").style.display = "none";
     document.getElementById("form").style.display = "grid";
@@ -495,66 +591,25 @@ document.getElementById("solicitante").addEventListener("change", e => {
     document.getElementById("correoVisible").value = correosSolicitantes[solicitante] || "";
 });
 
-// Vista previa + nombre al seleccionar imagen
-for (let i = 1; i <= 5; i++) {
-    document.getElementById("imagen" + i).addEventListener("change", function() {
-        const archivo = this.files[0];
-        const box = document.getElementById("box" + i);
-        const prev = document.getElementById("prev" + i);
-        const nameEl = document.getElementById("name" + i);
-        const labelWrap = box.querySelector(".label-wrap");
-
-        if (archivo) {
-            prev.src = URL.createObjectURL(archivo);
-            prev.style.display = "block";
-            labelWrap.style.display = "none";
-            nameEl.textContent = archivo.name;
-            box.classList.add("has-file");
-        }
-    });
-}
-
-// Botones quitar
-document.querySelectorAll(".rm-btn").forEach(btn => {
-    btn.addEventListener("click", function(e) {
-        e.stopPropagation();
-        const idx = this.dataset.idx;
-        const box = document.getElementById("box" + idx);
-        const prev = document.getElementById("prev" + idx);
-        const nameEl = document.getElementById("name" + idx);
-        const labelWrap = box.querySelector(".label-wrap");
-        const input = document.getElementById("imagen" + idx);
-
-        input.value = "";
-        prev.src = "";
-        prev.style.display = "none";
-        labelWrap.style.display = "";
-        nameEl.textContent = "Sin archivo";
-        box.classList.remove("has-file");
-    });
-});
-
+// ── Envío del formulario ──
 document.getElementById("form").addEventListener("submit", async e => {
     e.preventDefault();
 
     const msg = document.getElementById("msg");
     const btn = document.getElementById("btn-submit");
 
-    const ot = document.getElementById("ot").value.trim();
-    const solicitante = document.getElementById("solicitante").value;
-    const correo = correosSolicitantes[solicitante];
-    const tipoContrato = document.getElementById("tipoContrato").value.trim();
+    const ot             = document.getElementById("ot").value.trim();
+    const solicitante    = document.getElementById("solicitante").value;
+    const correo         = correosSolicitantes[solicitante];
+    const tipoContrato   = document.getElementById("tipoContrato").value.trim();
     const numeroContrato = document.getElementById("numeroContrato").value.trim();
-    const cliente = document.getElementById("cliente").value.trim();
-    const comentarios = document.getElementById("comentarios").value.trim();
+    const cliente        = document.getElementById("cliente").value.trim();
+    const comentarios    = document.getElementById("comentarios").value.trim();
 
-    const imagenes = [
-        document.getElementById("imagen1").files[0],
-        document.getElementById("imagen2").files[0],
-        document.getElementById("imagen3").files[0],
-        document.getElementById("imagen4").files[0],
-        document.getElementById("imagen5").files[0]
-    ].filter(Boolean);
+    // Recolectar TODAS las imágenes (fijas + dinámicas)
+    const imagenes = Array.from(
+        document.querySelectorAll("#file-grid .file-box input[type='file']")
+    ).map(inp => inp.files[0]).filter(Boolean);
 
     if (!ot || !solicitante || !tipoContrato || !numeroContrato || !cliente) {
         msg.className = "msg error";
@@ -595,23 +650,27 @@ document.getElementById("form").addEventListener("submit", async e => {
 
         if (!response.ok) throw new Error();
 
-        // Guardar OT antes de resetear
         const otEnviada = ot;
 
-        // Resetear formulario
+        // Resetear formulario: eliminar cajas dinámicas y limpiar fijas
         document.getElementById("form").reset();
-        for (let i = 1; i <= 5; i++) {
-            document.getElementById("name" + i).textContent = "Sin archivo";
-            const box = document.getElementById("box" + i);
-            const prev = document.getElementById("prev" + i);
-            prev.src = "";
-            prev.style.display = "none";
-            box.querySelector(".label-wrap").style.display = "";
-            box.classList.remove("has-file");
-        }
+        document.querySelectorAll("#file-grid .file-box").forEach((b, i) => {
+            const n = i + 1;
+            if (n > 5) {
+                b.remove();
+            } else {
+                const p = document.getElementById("prev" + n);
+                p.src = "";
+                p.style.display = "none";
+                b.querySelector(".label-wrap").style.display = "";
+                document.getElementById("name" + n).textContent = "Sin archivo";
+                b.classList.remove("has-file");
+            }
+        });
+        totalBoxes = 5;
         document.getElementById("correoVisible").value = "";
+        updateHelpText();
 
-        // Mostrar pantalla de éxito
         document.getElementById("success-ot").textContent = otEnviada;
         document.getElementById("form").style.display = "none";
         document.getElementById("success-screen").style.display = "block";
